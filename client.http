@@ -21,4 +21,33 @@ Content-Type: application/json
     "email":"kobe0@gmail.com"
 }
 
+//login user using value that is hardcoded into the database
+###
+POST http://localhost:3000/loginUser
+Content-Type: application/json
 
+{
+    "username": "gg",
+    "password": "34343",
+    "email":"wee0@gmail.com"
+}
+
+###
+POST http://localhost:3000/register
+Content-Type: application/json
+
+{
+    "username": "Fairuz",
+    "password": "11223344",
+    "email":"farid@gmail.com"
+}
+
+###
+POST http://localhost:3000/loginUser
+Content-Type: application/json
+
+{
+    "username": "Fairuz",
+    "password": "11223344",
+    "email":"farid@gmail.com"
+}

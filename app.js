@@ -18,6 +18,12 @@ let dbUsers = [
     email:"beee0@gmail.com"
   }]
 
+//encrypt existing user passwords in the database
+for (let i = 0; i < dbUsers.length; i++) {
+  const hashedPassword = bcrypt.hashSync(dbUsers[i].password, 12);
+  dbUsers[i].password = hashedPassword;
+}
+
   //must 1
   app.use(express.json());
   //must 2
@@ -29,7 +35,7 @@ let dbUsers = [
     res.send('Hello World!')
   })
 
-
+//asynchorous method help improver server performance and more responsive to user requests
   app.post('/signup', async (req, res) =>{
     //get username, password, email from the client
     const {username, password, email} = req.body;
@@ -67,4 +73,57 @@ app.post('/loginUser', async(req, res)=>{
     res.send("User not found")
     return
   }
+})
+
+// synchronous method, generate a salt and hash on separate function calls
+function login(username, password){
+  console.log("someone tried to login with", username, password)
+  
+  let matched = dbUsers.find(element=>element.username == username)
+
+  if(matched) {
+      const isMatch = bcrypt.compareSync(password, matched.password)
+
+      if(isMatch){
+          return matched
+      }         
+      else {
+          return "Password not matched"
+      }
+  }
+  else {
+      return "Username not found"
+  }
+}
+
+app.post('/loginUser',(req, res)=>{
+  let data = req.body
+  res.send(login(data.username, data.password))
+})
+
+
+function register(newusername, newpassword, newemail){
+  //Check if username exists
+  let matched = dbUsers.find(element=>element.username == newusername)
+
+  if(matched) {
+      return "This user already exists"
+  }
+
+  else {
+      const hashedpassword = bcrypt.hashSync(newpassword, 12)
+
+      dbUsers.push({
+          username: newusername,
+          password: hashedpassword,
+          email: newemail
+      })
+
+      return "new user is added"
+  }
+}
+
+app.post('/register', (req, res)=>{
+  let data = req.body
+  res.send(register(data.username, data.password, data.email))
 })
