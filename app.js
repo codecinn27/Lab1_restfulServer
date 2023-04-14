@@ -32,8 +32,10 @@ for (let i = 0; i < dbUsers.length; i++) {
   })
 
   app.get('/', (req,res)=> {
-    res.send('Hello World!')
+    res.send('Hello World')
   })
+
+  
 
 //asynchorous method help improver server performance and more responsive to user requests
   app.post('/signup', async (req, res) =>{
@@ -57,11 +59,13 @@ for (let i = 0; i < dbUsers.length; i++) {
     }
 })
 
+//async function for login
 app.post('/loginUser', async(req, res)=>{
   //get username and password
   const {username, password} = req.body;
   const user = dbUsers.find(Element=> Element.username === username);
   if(user){
+    //bcrypt.compare (data, encrypted)
     const hashPass = await bcrypt.compare(password, user.password)
     if(hashPass){
       res.send(user);
@@ -75,3 +79,57 @@ app.post('/loginUser', async(req, res)=>{
   }
 })
 
+// synchronous method, generate a salt and hash on separate function calls
+function login(username, password){
+  console.log("someone tried to login with", username, password)
+  
+  let matched = dbUsers.find(element=>element.username == username)
+
+  if(matched) {
+      const isMatch = bcrypt.compareSync(password, matched.password)
+
+      if(isMatch){
+          return matched
+      }         
+      else {
+          return "Password not matched"
+      }
+  }
+  else {
+      return "Username not found"
+  }
+}
+
+app.post('/loginUser',(req, res)=>{
+  let data = req.body
+  res.send(login(data.username, data.password))
+})
+
+
+function register(newusername, newpassword, newemail){
+  //Check if username exists
+  let matched = dbUsers.find(element=>element.username == newusername)
+
+  if(matched) {
+      return "This user already exists"
+  }
+
+  else {
+      const hashedpassword = bcrypt.hashSync(newpassword, 12)
+
+      dbUsers.push({
+          username: newusername,
+          password: hashedpassword,
+          email: newemail
+      })
+
+      return "new user is added"
+  }
+}
+
+app.post('/register', (req, res)=>{
+  //req is from the client
+  //req.body is everything written in the Content-Type: application/json refer to the object in the json file 
+  let data = req.body
+  res.send(register(data.username, data.password, data.email))
+})
